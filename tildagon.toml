@@ -18,7 +18,7 @@ wifi_preference = true
 
 [entry]
 # The name of your entry point `Application` class
-# class = "HackyRacersMoxieApp"
+class = "HackyRacersMoxieApp"
 
 [metadata]
 # Your nickname.  Must be at most 32 characters!
@@ -37,4 +37,4 @@ description = "A tildagon app for Hacky Racers moxie voting (crowd favourite)"
 # increased, we interpret this as a new version being released.
 #
 # Version number must be an string!
-version = "0.0.1"
+version = "0.0.2"
