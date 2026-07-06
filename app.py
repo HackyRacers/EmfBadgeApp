@@ -1,7 +1,7 @@
 import app
 import time
-import urequests
-import ujson
+import requests
+import json
 import os
 from app_components import clear_background
 from events.input import Buttons, BUTTON_TYPES
@@ -82,17 +82,19 @@ class HackyRacersMoxieApp(app.App):
             pass
 
         print("[DEBUG] Downloading PNG...")
-        res = urequests.get(image_url)
+        try:
+            res = requests.get(image_url)
+        except Exception as e:
+            print(f"[DEBUG] HTTP error: {e}")
+            return None
+
         print(f"[DEBUG] HTTP status: {res.status_code}")
 
         if res.status_code != 200:
             print("[DEBUG] Download failed")
-            res.close()
             return None
 
         png_bytes = res.content
-        res.close()
-
         print(f"[DEBUG] PNG bytes received: {len(png_bytes)}")
 
         try:
@@ -122,7 +124,7 @@ class HackyRacersMoxieApp(app.App):
                 self.selected_event_idx = (self.selected_event_idx - 1) % len(self.events)
             elif self.button_states.get(BUTTON_TYPES["DOWN"]):
                 self.button_states.clear()
-                self.selected_event_idx = (self.selected_event_idx + 1) % len(self.events)
+                self.selected_selected_event_idx = (self.selected_event_idx + 1) % len(self.events)
             elif self.button_states.get(BUTTON_TYPES["CONFIRM"]):
                 self.button_states.clear()
                 self.event_id = self.events[self.selected_event_idx]["id"]
@@ -140,7 +142,8 @@ class HackyRacersMoxieApp(app.App):
             try:
                 url = f"{BASE_URL}/api/moxie/events/{self.event_id}/vehicles"
                 print(f"[DEBUG] Fetching vehicles: {url}")
-                res = urequests.get(url)
+
+                res = requests.get(url)
                 print(f"[DEBUG] Vehicle HTTP status: {res.status_code}")
 
                 if res.status_code == 200:
@@ -162,8 +165,6 @@ class HackyRacersMoxieApp(app.App):
                     self.message = f"HTTP {res.status_code}"
                     self.state = "ERROR"
 
-                res.close()
-
             except Exception as e:
                 print(f"[DEBUG] Exception fetching vehicles: {e}")
                 self.message = "No WiFi"
@@ -184,7 +185,6 @@ class HackyRacersMoxieApp(app.App):
                     remaining = int((self.cooldown_period - (now - self.last_vote_time)) / 60)
                     self.message = f"Wait {remaining}m"
                     self.state = "COOLDOWN"
-                    #self.state = "VOTING"
                 else:
                     self.state = "VOTING"
 
@@ -192,8 +192,6 @@ class HackyRacersMoxieApp(app.App):
         elif self.state == "VOTING":
             try:
                 url = f"{BASE_URL}/api/moxie/events/{self.event_id}/vote"
-
-                #print(f"[DEBUG] Vote URL: {url}")
 
                 v_id = self.vehicles[self.selected_vehicle_idx]["id"]
 
@@ -208,9 +206,7 @@ class HackyRacersMoxieApp(app.App):
 
                 headers = {"Content-Type": "application/json"}
 
-                #print(f"[DEBUG] Vote HTTP Req: {ujson.dumps(payload)}")
-
-                res = urequests.post(url, data=ujson.dumps(payload), headers=headers)
+                res = requests.post(url, data=json.dumps(payload), headers=headers)
 
                 print(f"[DEBUG] Vote HTTP status: {res.status_code}")
 
@@ -220,8 +216,6 @@ class HackyRacersMoxieApp(app.App):
                 else:
                     self.message = f"Fail {res.status_code}"
                     self.state = "ERROR"
-
-                res.close()
 
             except Exception as e:
                 print(f"[DEBUG] Vote exception: {e}")
