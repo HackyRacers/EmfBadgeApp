@@ -37,4 +37,4 @@ description = "A tildagon app for Hacky Racers moxie voting (crowd favourite)"
 # increased, we interpret this as a new version being released.
 #
 # Version number must be an string!
-version = "0.0.4"
+version = "0.0.5"

@@ -3,6 +3,8 @@ import time
 import requests
 import json
 import os
+import ntptime
+import machine
 from app_components import clear_background
 from events.input import Buttons, BUTTON_TYPES
 
@@ -15,6 +17,11 @@ class HackyRacersMoxieApp(app.App):
         super().__init__()
 
         print("[DEBUG] App init")
+
+        ntptime.settime()
+        rtc = machine.RTC()
+        rtc.datetime()
+        print(f"[DEBUG] Time Synced with NTP: {time.localtime()}")
 
         self.button_states = Buttons(self)
 
@@ -35,7 +42,7 @@ class HackyRacersMoxieApp(app.App):
         self.message = ""
         self.client_hash = "tildagon-" + str(int(time.time()))
 
-        self.img_folder = os.path.dirname(__file__) + "/img"
+        self.img_folder = "apps/Hacky Racers/img"
         try:
             os.mkdir(self.img_folder)
             print("[DEBUG] Created img folder")
@@ -124,7 +131,7 @@ class HackyRacersMoxieApp(app.App):
                 self.selected_event_idx = (self.selected_event_idx - 1) % len(self.events)
             elif self.button_states.get(BUTTON_TYPES["DOWN"]):
                 self.button_states.clear()
-                self.selected_selected_event_idx = (self.selected_event_idx + 1) % len(self.events)
+                self.selected_event_idx = (self.selected_event_idx + 1) % len(self.events)
             elif self.button_states.get(BUTTON_TYPES["CONFIRM"]):
                 self.button_states.clear()
                 self.event_id = self.events[self.selected_event_idx]["id"]
@@ -181,6 +188,7 @@ class HackyRacersMoxieApp(app.App):
             elif self.button_states.get(BUTTON_TYPES["CONFIRM"]):
                 self.button_states.clear()
                 now = time.time()
+                print(f"[DEBUG] NOW TIME: {now}")
                 if now - self.last_vote_time < self.cooldown_period:
                     remaining = int((self.cooldown_period - (now - self.last_vote_time)) / 60)
                     self.message = f"Wait {remaining}m"
