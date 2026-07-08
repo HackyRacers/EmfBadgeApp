@@ -42,7 +42,7 @@ class HackyRacersMoxieApp(app.App):
         self.message = ""
         self.client_hash = "tildagon-" + str(int(time.time()))
 
-        self.img_folder = "apps/Hacky Racers/img"
+        self.img_folder = "apps/HackyRacers_EmfBadgeApp/img"
         try:
             os.mkdir(self.img_folder)
             print("[DEBUG] Created img folder")
